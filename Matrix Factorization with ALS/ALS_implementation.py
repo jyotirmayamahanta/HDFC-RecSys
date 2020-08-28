@@ -19,8 +19,8 @@ datapath = '../data-folder/frequency.csv'
 productpath = '../data-folder/product-id.csv'
 
 # No. of rows of data to read
-limit_rows = False
-nrows = 10000
+limit_rows = True
+nrows = 100000
 
 # Model Parameters
 alpha_val = 4.5
