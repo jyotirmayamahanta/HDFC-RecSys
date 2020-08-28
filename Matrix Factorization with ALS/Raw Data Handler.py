@@ -37,6 +37,8 @@ df.rename(columns = cols, inplace = True)
 
 print('\nAssigning IDs to products ... ', end='')
 
+os.chdir('../data-folder')
+
 # Assign IDs to Product - Numbered alphabetically starting from 1
 df2 = df.groupby(['Product']).count().reset_index().sort_values('Product')
 df2['ProductID'] = [x for x in range(1,df2.shape[0]+1)]
