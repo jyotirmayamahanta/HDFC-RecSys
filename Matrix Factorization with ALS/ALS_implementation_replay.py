@@ -34,7 +34,8 @@ N = 5
 
 #==============================================================================
 
-#Data Preprocessing
+# Data Preprocessing ==========================================================
+
 def read_data(datapath, productpath, nrows, limit_rows=False):
     # Look for files relative to the directory we are running from
     os.chdir(os.path.dirname(sys.argv[0]))
@@ -60,14 +61,16 @@ def read_data(datapath, productpath, nrows, limit_rows=False):
     df['ProductID'] = df['ProductID'] - 1
     
     return df, productID_to_name, name_to_productID
-    
+
+# Load frequency data and product-id maps
+data, id_to_name, name_to_id = read_data(datapath, productpath, nrows, limit_rows)
+
+# Creating the Sparse Confidence Matrix =======================================
+
 # Confidence Expression - Quantifying implicit data into confidence values
 def conf_exp(x):
     confidence = (x - 1.0)*alpha_val + 1.0
     return confidence
-
-# Load frequency data and product-id maps
-data, id_to_name, name_to_id = read_data(datapath, productpath, nrows, limit_rows)
 
 # Convert count data into confidence data
 data['Confidence'] = data['Count'].astype('double').apply(lambda x : conf_exp(x))
@@ -80,7 +83,8 @@ sparse_user_item = sparse.csr_matrix((data['Confidence'], (data['UserID'], data[
 #sparse_item_user.data = (sparse_item_user.data -1)*alpha_val +1
 #sample = sparse_item_user.toarray()
 
-# Fitting the model ===========================================================
+# Training the model using the Sparse Confidence Matrix =======================
+
 model = implicit.als.AlternatingLeastSquares(factors=factors, regularization=regularization, iterations=iterations)
 model.fit(sparse_item_user, True)
 
