@@ -14,8 +14,8 @@ np.random.seed(my_seed)
 
 #==============================================================================
 # Path to data
-datapath = '../sales-data/frequency.csv'
-productpath = '../sales-data/product-id.csv'
+datapath = '../data-folder/frequency.csv'
+productpath = '../data-folder/product-id.csv'
 
 # No. of rows to read
 nrows = 500000

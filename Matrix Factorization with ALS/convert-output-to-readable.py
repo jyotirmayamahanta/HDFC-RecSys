@@ -28,7 +28,7 @@ def create_data(productpath):
     return productID_to_name, name_to_productID
     
 #path to data
-productpath = '../sales-data/product-id.csv'
+productpath = '../data-folder/product-id.csv'
 id_to_name, name_to_id = create_data(productpath)
 
 df['Pur1'] = df['Pur1'].dropna().apply(lambda x: id_to_name[x])
