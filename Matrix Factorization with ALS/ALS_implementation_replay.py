@@ -1,8 +1,3 @@
-# -*- coding: utf-8 -*-
-"""
-Created on Sun Jun 23 22:20:58 2019
-@author: himansh
-"""
 #import libraries
 import os 
 import sys
@@ -17,13 +12,32 @@ my_seed = 10
 random.seed(my_seed)
 np.random.seed(my_seed)
 
+#==============================================================================
+# Path to data
+datapath = '../sales-data/frequency.csv'
+productpath = '../sales-data/product-id.csv'
+
+# No. of rows to read
+nrows = 500000
+
+# Model Parameters
+alpha_val = 20.250
+factors = 12
+regularization = 0.15150
+iterations = 75
+
+# Model Testing Parameters
+N = 10
+# user_id values - 73 #57 #27 #99 #30 #45 #55
+
+#==============================================================================
+
 #Data Preprocessing
-def create_data(datapath, productpath):
+def create_data(datapath, productpath, nrows):
     # Look for files relative to the directory we are running from
     os.chdir(os.path.dirname(sys.argv[0]))
     
-    #df=pd.read_csv(datapath, nrows=100000)
-    df=pd.read_csv(datapath)
+    df=pd.read_csv(datapath, nrows=nrows)
     df = df[['UserID', 'ProductID', 'Count']]
     #compensate for zero indexing in sparse matrix
     df['UserID'] = df['UserID'] - 1
@@ -38,55 +52,54 @@ def create_data(datapath, productpath):
         name_to_productID[productName] = productID
     
     return df, productID_to_name, name_to_productID
+
+def exp(x):
+    res = x*1.0000*alpha_val
+    #res = (x - 1.00)*alpha_val + 1.00
+    #res = res*alpha_val
     
-#path to data
-datapath = '../sales-data/frequency.csv'
-productpath = '../sales-data/product-id.csv'
-data, id_to_name, name_to_id = create_data(datapath, productpath)
+    return res
 
-sparse_item_user = sparse.csr_matrix((data['Count'].astype(float), (data['ProductID'], data['UserID'])))
-sparse_user_item = sparse.csr_matrix((data['Count'].astype(float), (data['UserID'], data['ProductID'])))
+data, id_to_name, name_to_id = create_data(datapath, productpath, nrows)
 
-#debug 
-sample = sparse_item_user.toarray()
 
-#Building the model
-model = implicit.als.AlternatingLeastSquares(factors=10, regularization=0.2, iterations=32)
+# Convert count data into confidence data =====================================
 
-alpha_val = 2
+data['Confidence'] = data['Count'].astype('double').apply(lambda x : exp(x))
 
-sparse_item_user.data = (sparse_item_user.data -1)*alpha_val +1
-sample = sparse_item_user.toarray()
+sparse_item_user = sparse.csr_matrix((data['Confidence'].astype('double'), (data['ProductID'], data['UserID'])))
+sparse_user_item = sparse.csr_matrix((data['Count'].astype('double'), (data['UserID'], data['ProductID'])))
 
-data_conf = (sparse_item_user* alpha_val).astype('double')
 
-model.fit(data_conf, True)
-#73 #57 #27 #99 #30 #45
+#Building the model ===========================================================
+
+model = implicit.als.AlternatingLeastSquares(factors=factors, regularization=regularization, iterations=iterations)
+model.fit(sparse_item_user, True)
+
 
 while(True):
     temp = input("Input UserID: ")
     if temp == 'quit':
         break
     
-    user_id = int(temp)  
+    user_id = int(temp)
+    # Printing Purchases ======================================================
     print('User', user_id, 'has made the following purchases:')
     user_id -= 1
     print("{:<20} {:<10}".format("Product", "Count"))
     #print all the items that user has bought
-    for index, row in data.iterrows():
-        if row['UserID'] == user_id:
-            pid = int(row['ProductID'])
-            count = int(row['Count'])
-            print("{:<20} {:<10}".format(id_to_name[pid], count))
+    for index, row in data[data['UserID']==user_id].iterrows():
+        pid = int(row['ProductID'])
+        count = int(row['Count'])
+        print("{:<20} {:<10}".format(id_to_name[pid], count))
 
-    N = 5
-
+    # Printing Recommendations ====================================================
     print('\nHis top', N, 'recommendations are:')
     print("{:<20} {:<10}".format("Product", "Score"))
-
+    
     ###USING THE MODEL
     #Get Recommendations
-    recommended = model.recommend(user_id, sparse_user_item, N=N, filter_already_liked_items=True)
+    recommended = model.recommend(user_id, sparse_user_item, N=N)
     for item in recommended:
         print("{:<20} {:<10.4f}".format(id_to_name[int(item[0])], item[1]*(1e2)))
 
