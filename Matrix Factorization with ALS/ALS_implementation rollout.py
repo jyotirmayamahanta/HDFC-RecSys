@@ -21,8 +21,8 @@ datapath = '../data-folder/frequency.csv'
 productpath = '../data-folder/product-id.csv'
 
 # No. of rows of data to read
-limit_rows = True
-nrows = 100000
+limit_rows = False
+nrows = 10000
 
 # User=Defined Model Parameters
 alpha_val = 4.5
@@ -147,7 +147,11 @@ output_in_name['Rec3'] = output_in_name['Rec3'].dropna().apply(lambda x: id_to_n
 output_in_name['Rec4'] = output_in_name['Rec4'].dropna().apply(lambda x: id_to_name[x-1])
 output_in_name['Rec5'] = output_in_name['Rec5'].dropna().apply(lambda x: id_to_name[x-1])
 
+try:
+    os.mkdir('../data-folder/roll-combinations')
+except FileExistsError:
+    pass
 
-os.mkdir('../data-folder/roll-combinations')
-output_in_id.to_csv('../data-folder/roll-combinations/recommendations-output-in-id.csv', index=False)
-output_in_name.to_csv('../data-folder/roll-combinations/recommendations-output-in-name.csv', index=False)
+os.chdir('../data-folder/roll-combinations')
+output_in_id.to_csv('recommendations-output-in-id.csv', index=False)
+output_in_name.to_csv('recommendations-output-in-name.csv', index=False)

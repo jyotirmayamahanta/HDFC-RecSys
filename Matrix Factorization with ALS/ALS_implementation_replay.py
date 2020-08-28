@@ -20,7 +20,7 @@ productpath = '../data-folder/product-id.csv'
 
 # No. of rows of data to read
 limit_rows = True
-nrows = 100000
+nrows = 1000000
 
 # User=Defined Model Parameters
 alpha_val = 4.5
@@ -96,21 +96,26 @@ while(True):
         break
     
     user_id = int(temp)
+    user_id -= 1    
     
-    # Printing Purchases
-    print('User', user_id, 'has made the following purchases:')
-    user_id -= 1
-    print("{:<20} {:<10}".format("Product", "Count"))
-    
-    for index, row in data[data['UserID']==user_id].iterrows():
-        pid = int(row['ProductID'])
-        count = int(row['Count'])
-        print("{:<20} {:<10}".format(id_to_name[pid], count))
-    
-    print('\nHis top', N, 'recommendations are:')
-    print("{:<20} {:<10}".format("Product", "Score"))
-    
-    # Print Recomendations 
-    recommended = model.recommend(user_id, sparse_user_item, N=N, filter_already_liked_items=True)
-    for item in recommended:
-        print("{:<20} {:<10.4f}".format(id_to_name[int(item[0])], item[1]*(1e2)))
+    try:
+        # Calulate Recommendations (might throw Index Error)
+        recommended = model.recommend(user_id, sparse_user_item, N=N, filter_already_liked_items=True)
+        
+        # Print Purchases
+        print('\nUser', user_id+1, 'has made the following purchases:')
+        print("{:<20} {:<10}".format("Product", "Count"))
+        for index, row in data[data['UserID']==user_id].iterrows():
+            pid = int(row['ProductID'])
+            count = int(row['Count'])
+            print("{:<20} {:<10}".format(id_to_name[pid], count))
+        
+        print('\nHis top', N, 'recommendations are:')
+        print("{:<20} {:<10}".format("Product", "Score"))
+        
+        # Print Recomendations 
+        for item in recommended:
+            print("{:<20} {:<10.4f}".format(id_to_name[int(item[0])], item[1]*(1e2)))
+            
+    except IndexError :
+        print("\nUserID does not exist\n")
