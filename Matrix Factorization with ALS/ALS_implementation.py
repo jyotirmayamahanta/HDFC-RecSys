@@ -22,14 +22,14 @@ productpath = '../data-folder/product-id.csv'
 limit_rows = True
 nrows = 100000
 
-# Model Parameters
+# User=Defined Model Parameters
 alpha_val = 4.5
 factors=10
 regularization=0.2
 iterations=32
 # 4.5, 10, 0.2, 32
 
-# Testing Model
+# Testing Model Parameters
 user_id = 65 #73#57#27#99#30#45
 N = 5
 
@@ -85,19 +85,18 @@ sparse_user_item = sparse.csr_matrix((data['Confidence'], (data['UserID'], data[
 model = implicit.als.AlternatingLeastSquares(factors=factors, regularization=regularization, iterations=iterations)
 model.fit(sparse_item_user, True)
 
-# Printing Purchases ==========================================================
+# Running the model ===========================================================
+
+# Printing Purchases
 print('User', user_id, 'has made the following purchases:')
 user_id -= 1
 print("{:<20} {:<10}".format("Product", "Count"))
-#print all the items that user has bought
+
 for index, row in data[data['UserID']==user_id].iterrows():
     pid = int(row['ProductID'])
     count = int(row['Count'])
     print("{:<20} {:<10}".format(id_to_name[pid], count))
 
-# Printing Recommendations ====================================================
-
-# Print column headings
 print('\nHis top', N, 'recommendations are:')
 print("{:<20} {:<10}".format("Product", "Score"))
 
