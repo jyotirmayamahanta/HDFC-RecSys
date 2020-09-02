@@ -93,12 +93,12 @@ model.fit(sparse_item_user, True)
 while(True):
     temp = input("Input UserID (or enter 'q' to quit): ")
     if temp == 'q':
-        break
-    
-    user_id = int(temp)
-    user_id -= 1    
+        break    
     
     try:
+        user_id = int(temp)
+        user_id -= 1
+        
         # Calulate Recommendations (might throw Index Error)
         recommended = model.recommend(user_id, sparse_user_item, N=N, filter_already_liked_items=True)
         
@@ -117,5 +117,5 @@ while(True):
         for item in recommended:
             print("{:<20} {:<10.4f}".format(id_to_name[int(item[0])], item[1]*(1e2)))
             
-    except IndexError :
+    except (IndexError, ValueError) :
         print("\nUserID does not exist\n")
