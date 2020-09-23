@@ -20,7 +20,7 @@ productpath = '../data-folder/product-id.csv'
 
 # No. of rows of data to read
 limit_rows = True
-nrows = 1000000
+nrows = 100000
 
 # User=Defined Model Parameters
 alpha_val = 4.5

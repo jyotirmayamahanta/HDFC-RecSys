@@ -19,7 +19,7 @@ datapath = '../data-folder/frequency.csv'
 productpath = '../data-folder/product-id.csv'
 
 # No. of rows of data to read
-limit_rows = True
+limit_rows = False
 nrows = 1000000
 
 # User=Defined Model Parameters
