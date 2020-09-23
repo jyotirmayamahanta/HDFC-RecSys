@@ -1,10 +1,7 @@
 import sys, os, pickle
 from random import shuffle
 from utils import *
-try:
-    from FPMC_numba import FPMC
-except ImportError:
-    from FPMC import FPMC
+from FPMC import FPMC
 
 class values:
     
