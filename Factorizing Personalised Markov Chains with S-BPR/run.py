@@ -9,20 +9,22 @@ except ImportError:
 class values:
     
     def __init__(self):
-        self.input_dir = 'data/'          # The directory of input
+        self.input_dir = 'data/'            # The directory of input
         self.n_epoch = 10                   # number of epoch
-        self.n_neg = 5                     # number of neg samples
+        self.n_neg = 5                      # number of neg samples
         self.n_factor = 12                  # dimensions of factorization
         self.learn_rate = 0.01              # learning rate
         self.regular = 0.001                # regularization
+        self.N = 10                         # No. of recommendations to output
         
-    def attach(self, input_dir, n_epoch, n_neg, n_factor, learn_rate, regular):
+    def attach(self, input_dir, n_epoch, n_neg, n_factor, learn_rate, regular, N):
         self.input_dir = input_dir
         self.n_epoch = n_epoch
         self.n_neg = n_neg
         self.n_factor = n_factor
         self.learn_rate = learn_rate
         self.regular = regular
+        self.N = N
 
 
 args = values()
@@ -53,7 +55,11 @@ fpmc.user_set = user_set
 fpmc.item_set = item_set
 fpmc.init_model()
 
-acc, mrr = fpmc.learnSBPR_FPMC(tr_data, te_data, n_epoch=args.n_epoch, 
-                               neg_batch_size=args.n_neg, eval_per_epoch=False)
+fpmc.learnSBPR_FPMC(tr_data, te_data, n_epoch=args.n_epoch, 
+                               neg_batch_size=args.n_neg)
 
-print ("Accuracy:%.2f MRR:%.2f" % (acc, mrr))
+test_user = 3
+topN = fpmc.recommend_topN(test_user, last_bucket_list[test_user][2], args.N)
+
+for i in topN:
+    print(i)

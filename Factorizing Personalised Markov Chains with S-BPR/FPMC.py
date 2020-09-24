@@ -43,29 +43,6 @@ class FPMC():
         latter = np.mean(self.VIL_m_VLI[:, b_tm1], axis=1).T
         return (former + latter)
 
-    def evaluation(self, data_list):
-        np.dot(self.VUI, self.VIU.T, out=self.VUI_m_VIU)
-        np.dot(self.VIL, self.VLI.T, out=self.VIL_m_VLI)
-
-        correct_count = 0
-        rr_list = []
-        for (u, i, b_tm1) in data_list:
-            scores = self.compute_x_batch(u, b_tm1)
-
-            if i == scores.argmax():
-                correct_count += 1
-
-            rank = len(np.where(scores > scores[i])[0]) + 1
-            rr = 1.0/rank
-            rr_list.append(rr)
-
-        try:
-            acc = correct_count / len(rr_list)
-            mrr = (sum(rr_list) / len(rr_list))
-            return (acc, mrr)
-        except:
-            return (0.0, 0.0)
-
     def learn_epoch(self, tr_data, neg_batch_size):
         for iter_idx in range(len(tr_data)):
             (u, b_tm, b_tm1) = random.choice(tr_data)
@@ -97,32 +74,11 @@ class FPMC():
                     self.VIL[j] += VILj_update
                     self.VLI[b_tm1] += VLI_update
 
-    def learnSBPR_FPMC(self, tr_data, te_data=None, n_epoch=10, neg_batch_size=10, eval_per_epoch=False):
+    def learnSBPR_FPMC(self, tr_data, te_data=None, n_epoch=10, neg_batch_size=10):
         for epoch in range(n_epoch):
             self.learn_epoch(tr_data, neg_batch_size=neg_batch_size)
 
-            if eval_per_epoch == True:
-                acc_in, mrr_in = self.evaluation(tr_data)
-                if te_data != None:
-                    acc_out, mrr_out = self.evaluation(te_data)
-                    print ('In sample:%.4f\t%.4f \t Out sample:%.4f\t%.4f' % (acc_in, mrr_in, acc_out, mrr_out))
-                else:
-                    print ('In sample:%.4f\t%.4f' % (acc_in, mrr_in))
-            else:
-                print ('epoch %d done' % epoch)
-
-        if eval_per_epoch == False:
-            acc_in, mrr_in = self.evaluation(tr_data)
-            if te_data != None:
-                acc_out, mrr_out = self.evaluation(te_data)
-                print ('In sample:%.4f\t%.4f \t Out sample:%.4f\t%.4f' % (acc_in, mrr_in, acc_out, mrr_out))
-            else:
-                print ('In sample:%.4f\t%.4f' % (acc_in, mrr_in))
-
-        if te_data != None:
-            return (acc_out, mrr_out)
-        else:
-            return None
+            print ('epoch %d done' % epoch)
         
     def recommend_topN(self, u, last_bucket, N):
         x_all = self.compute_x_batch(u, last_bucket)
