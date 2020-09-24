@@ -1,14 +1,17 @@
 import sys, os, pickle
 from random import shuffle
 from utils import *
-from FPMC import FPMC
+try:
+    from FPMC_numba import FPMC
+except ImportError:
+    from FPMC import FPMC
 
 class values:
     
     def __init__(self):
         self.input_dir = 'data/'          # The directory of input
-        self.n_epoch = 15                   # number of epoch
-        self.n_neg = 10                     # number of neg samples
+        self.n_epoch = 10                   # number of epoch
+        self.n_neg = 5                     # number of neg samples
         self.n_factor = 12                  # dimensions of factorization
         self.learn_rate = 0.01              # learning rate
         self.regular = 0.001                # regularization

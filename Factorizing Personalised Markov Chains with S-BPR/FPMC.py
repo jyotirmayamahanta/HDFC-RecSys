@@ -1,5 +1,6 @@
 import sys, os, pickle, time
 import math, random
+import heapq
 import numpy as np
 from utils import *
 
@@ -123,17 +124,16 @@ class FPMC():
         else:
             return None
         
-    def recommend_all(self, u, last_bucket):
+    def recommend_topN(self, u, last_bucket, N):
         x_all = self.compute_x_batch(u, last_bucket)
         
-        return x_all
-            
-        
-        
-    def recommend_topN(self, u, last_bucket, N):
-        x_all = self.recommendall(u, last_bucket)
+        temp = [[i, x_all[i]] for i in range(len(x_all))]
         # sort items using x values
+        topN = heapq.nlargest(N, temp, key = lambda t: t[1])
         # return top N items
+        topN_idx = [i[0] for i in topN]
+        
+        return topN_idx
         
         
         
