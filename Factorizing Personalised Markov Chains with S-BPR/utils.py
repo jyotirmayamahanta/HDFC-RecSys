@@ -1,5 +1,6 @@
 import csv, math
 import numpy as np
+import os, sys
 
 def sigmoid(x):
     if x >= 0:
@@ -7,10 +8,13 @@ def sigmoid(x):
     else:
         return math.exp(x - np.logaddexp(x, 0))
 
-def load_data_from_dir(dirname):
-    fname_user_idxseq = dirname + '/' + 'idxseq.txt'
-    fname_user_list = dirname + '/' + 'user_idx_list.txt'
-    fname_item_list = dirname + '/' + 'item_idx_list.txt'
+def load_data_from_dir(dirname = '../data-folder'):
+    os.chdir(dirname)
+    
+    fname_user_idxseq = 'fpmc_input.csv'
+    fname_user_list = 'fpmc_user_data.csv'
+    fname_item_list = 'fpmc_product_data.csv'
+    fname_id_item_list = 'fpmc-product-id.csv'
     user_set = load_idx_list_file(fname_user_list)
     item_set = load_idx_list_file(fname_item_list)
 
@@ -19,10 +23,11 @@ def load_data_from_dir(dirname):
     label = 1
     current_user = None
     with open(fname_user_idxseq ,'r') as f:
-        for l in f:
-            l = [int(s) for s in l.strip().split()]
-            user = l[0]
-            b_tm1 = list(set(l[1:]))
+        f.readline()
+        for l in csv.reader(f, delimiter=',', quotechar='"'):
+            #l = [int(s) for s in l.strip().split()]
+            user = int(l[0])
+            b_tm1 = list(set(map(int, l[1:])))
             
             if user==current_user:
                 label +=1
@@ -33,9 +38,17 @@ def load_data_from_dir(dirname):
                 current_user = user
 
             data_list.append((user, label, b_tm1))
-            
     
-    return data_list, last_bucket_list, user_set, item_set    
+    id_to_item = {}
+    with open(fname_id_item_list ,'r') as f:
+        f.readline()
+        for l in csv.reader(f, delimiter=',', quotechar='"'):
+            idx = int(l[0])
+            item_name = l[1]
+
+            id_to_item[idx] = item_name
+    
+    return data_list, last_bucket_list, user_set, item_set, id_to_item    
 
 
 def load_idx_list_file(fname, delimiter=','):

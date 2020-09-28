@@ -4,6 +4,10 @@ import heapq
 import numpy as np
 from utils import *
 
+my_seed = 1
+random.seed(my_seed)
+np.random.seed(my_seed)
+
 class FPMC():
     def __init__(self, n_user, n_item, n_factor, learn_rate, regular):
         self.user_set = set()
@@ -16,14 +20,6 @@ class FPMC():
         self.learn_rate = learn_rate
         self.regular = regular
 
-    @staticmethod
-    def dump(fpmcObj, fname):
-        pickle.dump(fpmcObj, open(fname, 'wb'))
-
-    @staticmethod
-    def load(fname):
-        return pickle.load(open(fname, 'rb'))
-
     def init_model(self, std=0.01):
         self.VUI = np.random.normal(0, std, size=(self.n_user, self.n_factor))
         self.VIU = np.random.normal(0, std, size=(self.n_item, self.n_factor))
@@ -34,6 +30,8 @@ class FPMC():
 
     def compute_x(self, u, i, b_tm1):
         acc_val = 0.0
+        if len(b_tm1) == 0:
+            return 0
         for l in b_tm1:
             acc_val += np.dot(self.VIL[i], self.VLI[l])
         return (np.dot(self.VUI[u], self.VIU[i]) + (acc_val/len(b_tm1)))
@@ -74,7 +72,7 @@ class FPMC():
                     self.VIL[j] += VILj_update
                     self.VLI[b_tm1] += VLI_update
 
-    def learnSBPR_FPMC(self, tr_data, te_data=None, n_epoch=10, neg_batch_size=10):
+    def learnSBPR_FPMC(self, tr_data, n_epoch=10, neg_batch_size=10):
         for epoch in range(n_epoch):
             self.learn_epoch(tr_data, neg_batch_size=neg_batch_size)
 
